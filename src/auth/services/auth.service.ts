@@ -77,7 +77,6 @@ export class AuthService {
     const hashed = await bcrypt.hash(newPassword, 10);
   
     try {
-      // ✅ Actualiza la contraseña real del usuario en la base de datos
       await this.prisma.user.update({
         where: { email },
         data: { password: hashed },
