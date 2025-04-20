@@ -13,8 +13,15 @@ model User {
   email    String    @unique
   password String
   roles    UserRole[]
-   active   Boolean   @default(true) 
+  active   Boolean   @default(true)
+
+  // Relación inversa con Cart
+  cart     Cart?
+
+  // Relación inversa con Order
+  orders   Order[]
 }
+
 
 model Role {
   id    Int       @id @default(autoincrement())
@@ -30,3 +37,65 @@ model UserRole {
 
   @@id([userId, roleId]) // Clave primaria compuesta
 }
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  stock       Int
+  imageUrl    String?
+  color       String?   // Nuevo campo para el color
+  size        String?   // Nuevo campo para el tamaño
+  brand       String?   // Nuevo campo para la marca
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+  total       Float
+  status      String      // ejemplo: 'pendiente', 'pagado', 'enviado'
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+

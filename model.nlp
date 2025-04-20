@@ -1,0 +1,577 @@
+{
+  "settings": {
+    "languages": [
+      "es"
+    ],
+    "forceNER": true,
+    "tag": "nlp",
+    "threshold": 0.5,
+    "autoLoad": true,
+    "autoSave": true,
+    "modelFileName": "model.nlp",
+    "executeActionsBeforeAnswers": false,
+    "calculateSentiment": true
+  },
+  "nluManager": {
+    "settings": {
+      "tag": "nlu-manager"
+    },
+    "locales": [
+      "es"
+    ],
+    "languageNames": {},
+    "domainManagers": {
+      "es": {
+        "settings": {
+          "locale": "es",
+          "trainByDomain": false,
+          "tag": "domain-manager-es",
+          "nluByDomain": {
+            "default": {
+              "className": "NeuralNlu",
+              "settings": {}
+            }
+          },
+          "useStemDict": true
+        },
+        "stemDict": {
+          "%brand%,%color%,%size%,camis,quer,una": {
+            "intent": "product.query",
+            "domain": "default"
+          },
+          "%brand%,%color%,%size%,camiset,muestram,una": {
+            "intent": "product.query",
+            "domain": "default"
+          },
+          "%brand%,%color%,%size%,busc,camis,de,estar,una": {
+            "intent": "product.query",
+            "domain": "default"
+          },
+          "%color%,camis,quer,una": {
+            "intent": "product.query",
+            "domain": "default"
+          },
+          "%color%,algo,color,de,muestram": {
+            "intent": "product.query",
+            "domain": "default"
+          },
+          "%brand%,busc,de,marc,rop": {
+            "intent": "product.query",
+            "domain": "default"
+          }
+        },
+        "intentDict": {
+          "product.query": "default"
+        },
+        "sentences": [
+          {
+            "domain": "default",
+            "utterance": "Quiero una camisa %color% %size% %brand%",
+            "intent": "product.query"
+          },
+          {
+            "domain": "default",
+            "utterance": "Muéstrame una camiseta %color% %size% %brand%",
+            "intent": "product.query"
+          },
+          {
+            "domain": "default",
+            "utterance": "Estoy buscando una camisa de %color% %size% %brand%",
+            "intent": "product.query"
+          },
+          {
+            "domain": "default",
+            "utterance": "Quiero una camisa %color%",
+            "intent": "product.query"
+          },
+          {
+            "domain": "default",
+            "utterance": "Muéstrame algo de color %color%",
+            "intent": "product.query"
+          },
+          {
+            "domain": "default",
+            "utterance": "Busco ropa de marca %brand%",
+            "intent": "product.query"
+          }
+        ],
+        "domains": {
+          "master_domain": {
+            "settings": {
+              "locale": "es",
+              "tag": "nlu-es",
+              "keepStopwords": true,
+              "nonefeatureValue": 1,
+              "nonedeltaMultiplier": 1.2,
+              "spellCheck": false,
+              "spellCheckDistance": 1,
+              "filterZeros": true,
+              "log": true
+            },
+            "features": {
+              "quer": 1,
+              "una": 1,
+              "camis": 1,
+              "%color%": 1,
+              "%size%": 1,
+              "%brand%": 1,
+              "muestram": 1,
+              "camiset": 1,
+              "estar": 1,
+              "busc": 1,
+              "de": 1,
+              "algo": 1,
+              "color": 1,
+              "rop": 1,
+              "marc": 1
+            },
+            "intents": {
+              "product.query": 1
+            },
+            "intentFeatures": {
+              "product.query": {
+                "quer": 1,
+                "una": 1,
+                "camis": 1,
+                "%color%": 1,
+                "%size%": 1,
+                "%brand%": 1,
+                "muestram": 1,
+                "camiset": 1,
+                "estar": 1,
+                "busc": 1,
+                "de": 1,
+                "algo": 1,
+                "color": 1,
+                "rop": 1,
+                "marc": 1
+              }
+            },
+            "featuresToIntent": {
+              "quer": [
+                "product.query"
+              ],
+              "una": [
+                "product.query"
+              ],
+              "camis": [
+                "product.query"
+              ],
+              "%color%": [
+                "product.query"
+              ],
+              "%size%": [
+                "product.query"
+              ],
+              "%brand%": [
+                "product.query"
+              ],
+              "muestram": [
+                "product.query"
+              ],
+              "camiset": [
+                "product.query"
+              ],
+              "estar": [
+                "product.query"
+              ],
+              "busc": [
+                "product.query"
+              ],
+              "de": [
+                "product.query"
+              ],
+              "algo": [
+                "product.query"
+              ],
+              "color": [
+                "product.query"
+              ],
+              "rop": [
+                "product.query"
+              ],
+              "marc": [
+                "product.query"
+              ]
+            },
+            "neuralNetwork": {
+              "settings": {
+                "locale": "es",
+                "tag": "nlu-es",
+                "keepStopwords": true,
+                "nonefeatureValue": 1,
+                "nonedeltaMultiplier": 1.2,
+                "spellCheck": false,
+                "spellCheckDistance": 1,
+                "filterZeros": true,
+                "log": true
+              },
+              "features": [
+                "quer",
+                "una",
+                "camis",
+                "%color%",
+                "%size%",
+                "%brand%",
+                "muestram",
+                "camiset",
+                "estar",
+                "busc",
+                "de",
+                "algo",
+                "color",
+                "rop",
+                "marc"
+              ],
+              "intents": [
+                "product.query"
+              ],
+              "perceptrons": [
+                [
+                  2.7289986610412598,
+                  2.829457998275757,
+                  1.392529010772705,
+                  3.890824317932129,
+                  -1.2394952774047852,
+                  1.5215493440628052,
+                  2.4950156211853027,
+                  1.433106541633606,
+                  -1.3364367485046387,
+                  1.4255809783935547,
+                  2.4834330081939697,
+                  1.0595990419387817,
+                  1.0595990419387817,
+                  2.76025128364563,
+                  2.76025128364563,
+                  3.32686837622037
+                ]
+              ]
+            }
+          }
+        }
+      }
+    },
+    "intentDomains": {},
+    "extraSentences": [
+      [
+        "es",
+        "Quiero una camisa %color% %size% %brand%"
+      ],
+      [
+        "es",
+        "Muéstrame una camiseta %color% %size% %brand%"
+      ],
+      [
+        "es",
+        "Estoy buscando una camisa de %color% %size% %brand%"
+      ],
+      [
+        "es",
+        "Quiero una camisa %color%"
+      ],
+      [
+        "es",
+        "Muéstrame algo de color %color%"
+      ],
+      [
+        "es",
+        "Busco ropa de marca %brand%"
+      ]
+    ]
+  },
+  "ner": {
+    "settings": {
+      "tag": "ner",
+      "entityPreffix": "%",
+      "entitySuffix": "%"
+    },
+    "rules": {
+      "azul": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "azul",
+              "texts": [
+                "azul"
+              ]
+            }
+          ]
+        }
+      },
+      "rojo": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "rojo",
+              "texts": [
+                "rojo"
+              ]
+            }
+          ]
+        }
+      },
+      "roja": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "rojo",
+              "texts": [
+                "rojo"
+              ]
+            }
+          ]
+        }
+      },
+      "verde": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "verde",
+              "texts": [
+                "verde"
+              ]
+            }
+          ]
+        }
+      },
+      "negro": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "negro",
+              "texts": [
+                "negro"
+              ]
+            }
+          ]
+        }
+      },
+      "negra": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "negro",
+              "texts": [
+                "negro"
+              ]
+            }
+          ]
+        }
+      },
+      "blanco": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "blanco",
+              "texts": [
+                "blanco"
+              ]
+            }
+          ]
+        }
+      },
+      "blanca": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "blanco",
+              "texts": [
+                "blanco"
+              ]
+            }
+          ]
+        }
+      },
+      "amarillo": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "amarillo",
+              "texts": [
+                "amarillo"
+              ]
+            }
+          ]
+        }
+      },
+      "amarilla": {
+        "color": {
+          "name": "color",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "amarillo",
+              "texts": [
+                "amarillo"
+              ]
+            }
+          ]
+        }
+      },
+      "S": {
+        "size": {
+          "name": "size",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "S",
+              "texts": [
+                "S"
+              ]
+            }
+          ]
+        }
+      },
+      "M": {
+        "size": {
+          "name": "size",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "M",
+              "texts": [
+                "M"
+              ]
+            }
+          ]
+        }
+      },
+      "L": {
+        "size": {
+          "name": "size",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "L",
+              "texts": [
+                "L"
+              ]
+            }
+          ]
+        }
+      },
+      "XL": {
+        "size": {
+          "name": "size",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "XL",
+              "texts": [
+                "XL"
+              ]
+            }
+          ]
+        }
+      },
+      "Nike": {
+        "brand": {
+          "name": "brand",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "Nike",
+              "texts": [
+                "Nike"
+              ]
+            }
+          ]
+        }
+      },
+      "Adidas": {
+        "brand": {
+          "name": "brand",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "Adidas",
+              "texts": [
+                "Adidas"
+              ]
+            }
+          ]
+        }
+      },
+      "Puma": {
+        "brand": {
+          "name": "brand",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "Puma",
+              "texts": [
+                "Puma"
+              ]
+            }
+          ]
+        }
+      },
+      "Reebok": {
+        "brand": {
+          "name": "brand",
+          "type": "enum",
+          "rules": [
+            {
+              "option": "Reebok",
+              "texts": [
+                "Reebok"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "nlgManager": {
+    "settings": {
+      "tag": "nlg-manager"
+    },
+    "responses": {}
+  },
+  "actionManager": {
+    "settings": {
+      "tag": "action-manager"
+    },
+    "actions": {}
+  },
+  "slotManager": {
+    "product.query": {
+      "color": {
+        "intent": "product.query",
+        "entity": "color",
+        "mandatory": false,
+        "locales": {}
+      },
+      "size": {
+        "intent": "product.query",
+        "entity": "size",
+        "mandatory": false,
+        "locales": {}
+      },
+      "brand": {
+        "intent": "product.query",
+        "entity": "brand",
+        "mandatory": false,
+        "locales": {}
+      }
+    }
+  }
+}
