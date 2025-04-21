@@ -5,8 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { NodeNplModule } from './node-npl/node-npl.module';
+import { GeminiModule } from './gemini/gemini.module';
 
 @Module({
   imports: [
@@ -22,7 +21,7 @@ import { NodeNplModule } from './node-npl/node-npl.module';
         from: `"Soporte" <${process.env.MAIL_USER}>`,
       },
     }),
-    PrismaModule, UsersModule, AuthModule, NodeNplModule],
+    PrismaModule, UsersModule, AuthModule, GeminiModule],
   controllers: [AppController],
   providers: [AppService],
 })
