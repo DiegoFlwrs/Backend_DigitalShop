@@ -16,10 +16,10 @@ export class BusquedaService {
 Usa exactamente los campos: color, size, brand, category. 
 Ejemplo de salida válida: color = 'negro' AND size = 'M' AND category = 'polo'.
 corrige las faltas ortográficas que haya y dale sentido si no lo tiene y extrae los filtros por los cuales se pueda filtrar en una BD.
-ten cuidado en category, ahi puede aver valores como polos, camisas, zapatillas, etc, que distinguien el tipo de prenda
+ten cuidado en category, ahi puede aver valores como polos, camisas, zapatillas, etc, que distinguien el tipo de prenda, la categoria
+como venga tienes que filtrarlo en mayusculas y en plural
 Frase: "${consultaUsuario}"`
       );
-
       const filtros = await this.convertirCondiciones(respuestaGemini);
 
       const prendas = await this.prisma.product.findMany({

@@ -16,7 +16,7 @@ export class GeminiController {
     };
   }
 
-  @Get('busqueda')
+  @Post('busqueda')
   async buscar(@Body() body: { consulta: string }) {
     return this.busquedaService.buscarPrendas(body.consulta);
   }
