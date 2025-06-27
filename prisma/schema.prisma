@@ -20,6 +20,8 @@ model User {
 
   // Relación inversa con Order
   orders   Order[]
+
+  favorites Favorite[]
 }
 
 
@@ -35,7 +37,7 @@ model UserRole {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@id([userId, roleId]) // Clave primaria compuesta
+  @@id([userId, roleId]) 
 }
 
 model Product {
@@ -45,15 +47,16 @@ model Product {
   price       Float
   stock       Int
   imageUrl    String?
-  color       String?   // Nuevo campo para el color
-  size        String?   // Nuevo campo para el tamaño
-  brand       String?   // Nuevo campo para la marca
+  color       String?   
+  size        String?  
+  brand       String?   
   categoryId  Int
   category    Category  @relation(fields: [categoryId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   cartItems   CartItem[]
   orderItems  OrderItem[]
+  favorites Favorite[]
 }
 
 model Category {
@@ -84,7 +87,7 @@ model Order {
   userId      Int
   user        User        @relation(fields: [userId], references: [id])
   total       Float
-  status      String      // ejemplo: 'pendiente', 'pagado', 'enviado'
+  status      String      
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
 }
@@ -99,3 +102,12 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
 }
 
+model Favorite {
+  userId    Int
+  productId Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId]) 
+}
