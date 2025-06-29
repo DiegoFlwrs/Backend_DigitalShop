@@ -8,6 +8,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { GeminiModule } from './gemini/gemini.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { StatisticsModule } from './statistics/statistics.module';
         from: `"Soporte" <${process.env.MAIL_USER}>`,
       },
     }),
-    PrismaModule, UsersModule, AuthModule, GeminiModule, FavoritesModule, StatisticsModule],
+    PrismaModule, UsersModule, AuthModule, GeminiModule, FavoritesModule, StatisticsModule, CartModule],
   controllers: [AppController],
   providers: [AppService],
 })
