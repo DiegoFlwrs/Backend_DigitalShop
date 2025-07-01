@@ -71,7 +71,6 @@ export class OrdersService {
         }
       });
 
-      // 2. Create order items
       const orderItems = await Promise.all(
         cart.items.map(item =>
           prisma.orderItem.create({
@@ -87,10 +86,6 @@ export class OrdersService {
           })
         )
       );
-
-      await prisma.cartItem.deleteMany({
-        where: { cartId: cart.id },
-      });
 
       return { ...newOrder, orderItems };
     });
