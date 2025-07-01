@@ -8,20 +8,18 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  name     String
-  email    String    @unique
-  password String
-  roles    UserRole[]
-  active   Boolean   @default(true)
-
-  // Relación inversa con Cart
-  cart     Cart?
-
-  // Relación inversa con Order
-  orders   Order[]
-
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String?  
+  provider  String?   
+  providerId String?  
+  roles     UserRole[]
+  active    Boolean   @default(true)
+  cart      Cart?
+  orders    Order[]
   favorites Favorite[]
+  payments  Payment[]
 }
 
 
@@ -82,14 +80,34 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
 }
 
+model Payment {
+  id            Int      @id @default(autoincrement())
+  paymentMethod String
+  amount        Float
+  currency      String   @default("PEN")
+  transactionId String?
+  status        String   @default("pending")
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  orderId      Int
+  order        Order    @relation(fields: [orderId], references: [id])
+}
+
 model Order {
   id          Int         @id @default(autoincrement())
   userId      Int
   user        User        @relation(fields: [userId], references: [id])
   total       Float
-  status      String      
+  status      String      @default("pending")
+  shippingAddress String?
+  notes       String?
   createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
+  payments    Payment[]
 }
 
 model OrderItem {

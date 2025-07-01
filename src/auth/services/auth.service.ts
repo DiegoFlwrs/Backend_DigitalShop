@@ -4,7 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CodeData } from '../data/data';
+import { OAuth2Client } from 'google-auth-library';
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService, private prisma: PrismaService, private readonly mailerService: MailerService) {}
@@ -92,5 +94,74 @@ export class AuthService {
       };
     }
   }
+
+  async validateOrCreateSocialUser(profile: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    provider: string;
+    providerId: string;
+    picture?: string;
+  }) {
+    // Buscar usuario existente por email o providerId
+    let user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: profile.email },
+          { providerId: profile.providerId, provider: profile.provider },
+        ],
+      },
+    });
+
+    // Si no existe, crear nuevo usuario
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          name: `${profile.firstName} ${profile.lastName}`,
+          email: profile.email,
+          provider: profile.provider,
+          providerId: profile.providerId,
+          active: true,
+          // Asignar rol por defecto (ajusta según tu lógica de roles)
+          roles: {
+            create: {
+              role: {
+                connect: { id: 1 }, // Asume que tienes un rol 'user'
+              },
+            },
+          },
+          // Crear carrito vacío para el nuevo usuario
+          cart: {
+            create: {},
+          },
+        },
+      });
+    }
+
+    return user;
+  }
+
+  async generateJWT(user: any) {
+  const payload = { 
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    roles: user.roles?.map((role: any) => role.role.name) || [] 
+  };
+  return {
+    token: this.jwtService.sign(payload),
+    user,
+  };
+}
+
+  async verifyGoogleToken(idToken: string) {
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  if (!payload) throw new Error("Token inválido");
+  return payload;
+}
 
 }

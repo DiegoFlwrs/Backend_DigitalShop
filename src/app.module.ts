@@ -9,6 +9,8 @@ import { GeminiModule } from './gemini/gemini.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { CartModule } from './cart/cart.module';
+import { PaymentsModule } from './payments/payments.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { CartModule } from './cart/cart.module';
         from: `"Soporte" <${process.env.MAIL_USER}>`,
       },
     }),
-    PrismaModule, UsersModule, AuthModule, GeminiModule, FavoritesModule, StatisticsModule, CartModule],
+    PrismaModule, UsersModule, AuthModule, GeminiModule, FavoritesModule, StatisticsModule, CartModule, PaymentsModule, OrdersModule],
   controllers: [AppController],
   providers: [AppService],
 })
