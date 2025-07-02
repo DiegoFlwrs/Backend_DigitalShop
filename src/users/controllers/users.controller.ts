@@ -45,7 +45,7 @@ export class UsersController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
-  @Post()
+  @Post('/rol')
   createSR(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createSR(createUserDto);
   }
