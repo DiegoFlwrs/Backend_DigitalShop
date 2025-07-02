@@ -93,8 +93,8 @@ export class PaymentsService {
         });
 
         for (const item of orderItems) {
-          await prisma.product.update({
-            where: { id: item.productId },
+          await prisma.productVariant.update({
+            where: { id: item.productVariantId },
             data: {
               stock: {
                 decrement: item.quantity,
@@ -124,7 +124,7 @@ export class PaymentsService {
 
       await this.prisma.order.update({
         where: { id: orderId },
-        data: { status: 'failed' }, 
+        data: { status: 'failed' },
       });
     }
 

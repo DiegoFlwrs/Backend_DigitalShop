@@ -7,25 +7,25 @@ import { CreateOrderDto } from '../dtos/create-order.dto';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
-  private mapOrderToResponse(order: any): OrderResponseDto {
-    return {
-      id: order.id,
-      total: order.total,
-      status: order.status,
-      createdAt: order.createdAt,
-      items: order.orderItems.map(item => ({
-        productId: item.productId,
-        name: item.product.name,
-        price: item.price,
-        quantity: item.quantity,
-        imageUrl: item.product.imageUrl,
-      })),
-      user:{
-        name: order.user.name,
-        email: order.user.email,
-      }
-    };
-  }
+private mapOrderToResponse(order: any): OrderResponseDto {
+  return {
+    id: order.id,
+    total: order.total,
+    status: order.status,
+    createdAt: order.createdAt,
+    items: order.orderItems.map((item) => ({
+      productId: item.variant.product.id,
+      name: item.variant.product.name,
+      price: item.price,
+      quantity: item.quantity,
+      imageUrl: item.variant.product.imageUrl,
+    })),
+    user: {
+      name: order.user.name,
+      email: order.user.email,
+    },
+  };
+}
 
   async createOrder(
     userId: number,
@@ -33,12 +33,16 @@ export class OrdersService {
   ): Promise<OrderResponseDto> {
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
-      include: { 
+      include: {
         items: {
           include: {
-            product: true
-          }
-        } 
+            variant: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -47,15 +51,15 @@ export class OrdersService {
     }
 
     for (const item of cart.items) {
-      if (item.product.stock < item.quantity) {
-        throw new Error(`Insufficient stock for ${item.product.name}`);
+      if (item.variant.stock < item.quantity) {
+        throw new Error(`Insufficient stock for ${item.variant.product.name}`);
       }
     }
 
-    const total = cart.items.reduce(
-      (sum, item) => sum + (item.product.price * item.quantity),
-      0,
-    );
+    const total = cart.items.reduce((sum, item) => {
+      const price = item.variant.price ?? item.variant.product.basePrice;
+      return sum + price * item.quantity;
+    }, 0);
 
     const order = await this.prisma.$transaction(async (prisma) => {
       const newOrder = await prisma.order.create({
@@ -66,25 +70,29 @@ export class OrdersService {
           shippingAddress: createOrderDto.shippingAddress,
           notes: createOrderDto.notes,
         },
-        include:{
-          user:true
-        }
+        include: {
+          user: true,
+        },
       });
 
       const orderItems = await Promise.all(
-        cart.items.map(item =>
+        cart.items.map((item) =>
           prisma.orderItem.create({
             data: {
               orderId: newOrder.id,
-              productId: item.productId,
+              productVariantId: item.variant.id,
               quantity: item.quantity,
-              price: item.product.price,
+              price: item.variant.price ?? item.variant.product.basePrice,
             },
             include: {
-              product: true,
+              variant: {
+                include: {
+                  product: true,
+                },
+              },
             },
-          })
-        )
+          }),
+        ),
       );
 
       return { ...newOrder, orderItems };
@@ -96,13 +104,17 @@ export class OrdersService {
   async getOrder(userId: number, orderId: number): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId, userId },
-      include: { 
+      include: {
         orderItems: {
           include: {
-            product: true
-          }
+            variant: {
+              include: {
+                product: true,
+              },
+            },
+          },
         },
-        user:true 
+        user: true,
       },
     });
 
@@ -116,19 +128,21 @@ export class OrdersService {
   async getUserOrders(userId: number): Promise<OrderResponseDto[]> {
     const orders = await this.prisma.order.findMany({
       where: { userId },
-      include: { 
+      include: {
         orderItems: {
           include: {
-            product: true
-          }
-        } 
-      },
-      orderBy: {
-        createdAt: 'desc',
+            variant: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
+        user: true,
       },
     });
 
-    return orders.map(order => this.mapOrderToResponse(order));
+    return orders.map((order) => this.mapOrderToResponse(order));
   }
 
   async updateOrderStatus(orderId: number, status: string) {

@@ -36,33 +36,39 @@ export class StatisticsService {
   }
 
   async getFavoritesByColor() {
-    const data = await this.prisma.favorite.groupBy({
-      by: ['productId'],
-      _count: { productId: true },
-    });
+  const data = await this.prisma.favorite.groupBy({
+    by: ['productId'],
+    _count: { productId: true },
+  });
 
-    const productIds = data.map((d) => d.productId);
-    const products = await this.prisma.product.findMany({
-      where: { id: { in: productIds } },
-      select: {
-        id: true,
-        color: true,
-      },
-    });
+  const productIds = data.map((d) => d.productId);
 
-    const result = {};
-    for (const product of products) {
-      const color = product.color ?? 'Sin color';
-      const count = data.find((d) => d.productId === product.id)?._count.productId ?? 0;
-      if (result[color]) {
-        result[color] += count;
-      } else {
-        result[color] = count;
-      }
+  // Traemos todas las variantes con sus colores y el producto relacionado
+  const variants = await this.prisma.productVariant.findMany({
+    where: { productId: { in: productIds } },
+    select: {
+      color: true,
+      productId: true,
+    },
+  });
+
+  const result: Record<string, number> = {};
+
+  for (const variant of variants) {
+    const color = variant.color ?? 'Sin color';
+    const count =
+      data.find((d) => d.productId === variant.productId)?._count.productId ??
+      0;
+
+    if (result[color]) {
+      result[color] += count;
+    } else {
+      result[color] = count;
     }
-
-    return result; // Ejemplo: { "Rojo": 5, "Azul": 3, "Sin color": 2 }
   }
+
+  return result; // Ejemplo: { "Rojo": 5, "Azul": 3 }
+}
 
   async getProductsByCategory() {
     const data = await this.prisma.product.groupBy({
