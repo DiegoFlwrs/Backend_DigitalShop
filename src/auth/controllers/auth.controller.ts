@@ -47,11 +47,6 @@ export class AuthController {
       providerId: req.user.providerId,
       picture: req.user.picture,
     });
-
-    const token = await this.authService.generateJWT(user);
-    res.redirect(
-      `${process.env.FRONTEND_URL}/auth/success?token=${token.token}`,
-    );
   }
 
   @Post('google')
