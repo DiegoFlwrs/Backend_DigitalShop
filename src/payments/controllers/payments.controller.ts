@@ -48,4 +48,5 @@ export class PaymentsController {
     const userId = (req.user as any)?.userId;
     return this.paymentsService.getPaymentStatus(userId, parseInt(id));
   }
+  
 }

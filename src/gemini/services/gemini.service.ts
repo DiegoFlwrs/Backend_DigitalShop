@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
 @Injectable()
 export class GeminiService {
-    private readonly GEMINI_API_KEY = 'AIzaSyD3hlTIQuEEi9p1NaC9CJMTI1HheAGpqnE';
-    private readonly GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.GEMINI_API_KEY}`;
-  
+    private readonly geminiApiKey: string;
+  private readonly geminiUrl: string;
+
+  constructor(private configService: ConfigService) {
+    this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY')!;
+    this.geminiUrl = `${this.configService.get<string>('GEMINI_URL')}?key=${this.geminiApiKey}`;
+  }
     async queryToSQL(query: string): Promise<string> {
       try {
-        const response = await axios.post(this.GEMINI_URL, {
+        const response = await axios.post(this.geminiUrl, {
           contents: [
             {
               parts: [{ text: query }],
