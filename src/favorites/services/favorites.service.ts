@@ -36,7 +36,8 @@ export class FavoritesService {
     include: {
       product: {
         include: {
-          category: true
+          category: true,
+          variants: true,
         }
       }
     }

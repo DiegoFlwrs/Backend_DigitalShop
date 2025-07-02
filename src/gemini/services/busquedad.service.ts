@@ -13,23 +13,42 @@ export class BusquedaService {
     try {
       const respuestaGemini = await this.geminiService.queryToSQL(
         `Extrae los filtros de esta frase y dame solo la condición SQL para buscar en una base de datos. 
-Usa exactamente los campos: color, size, brand, category. 
-Ejemplo de salida válida: color = 'negro' AND size = 'M' AND category = 'polo'.
-corrige las faltas ortográficas que haya y dale sentido si no lo tiene y extrae los filtros por los cuales se pueda filtrar en una BD.
-ten cuidado en category, ahi puede aver valores como polos, camisas, zapatillas, etc, que distinguien el tipo de prenda, la categoria
-como venga tienes que filtrarlo en mayusculas y en plural
-Frase: "${consultaUsuario}"`
+        Usa exactamente los campos: color, size, brand, category. 
+        Ejemplo de salida válida: color = 'negro' AND size = 'M' AND category = 'polo'.
+        corrige las faltas ortográficas que haya y dale sentido si no lo tiene.
+        Frase: "${consultaUsuario}"`
       );
-      const filtros = await this.convertirCondiciones(respuestaGemini);
 
-      const prendas = await this.prisma.product.findMany({
-        where: filtros,
+      const filtros = await this.convertirCondiciones(respuestaGemini);
+      
+      return this.prisma.product.findMany({
+        where: {
+          AND: [
+            // Filtros para el producto
+            {
+              OR: [
+                filtros.brand ? { brand: { contains: filtros.brand, mode: 'insensitive' } } : {},
+                filtros.categoryId ? { categoryId: filtros.categoryId } : {},
+              ],
+            },
+            // Filtros para las variantes
+            {
+              variants: {
+                some: {
+                  AND: [
+                    filtros.color ? { color: { equals: filtros.color, mode: 'insensitive' } } : {},
+                    filtros.size ? { size: { equals: filtros.size } } : {},
+                  ],
+                },
+              },
+            },
+          ],
+        },
         include: {
-          category: true, 
+          variants: true,
+          category: true,
         },
       });
-
-      return prendas;
     } catch (error) {
       console.error('Error en búsqueda:', error);
       return [];
@@ -43,7 +62,7 @@ Frase: "${consultaUsuario}"`
       talla: 'size',
       marca: 'brand',
       color: 'color',
-      category: 'categoryId', 
+      category: 'categoryId',
     };
   
     const regex = /(\w+)\s*=\s*'([^']+)'/g;
@@ -56,19 +75,19 @@ Frase: "${consultaUsuario}"`
       const campo = camposMapeados[campoOriginal] || campoOriginal;
 
       if (campo === 'categoryId') {
-        const categoria = await this.prisma.category.findUnique({
+        const categoria = await this.prisma.category.findFirst({
           where: {
-            name: valor, 
+            name: {
+              contains: valor,
+              mode: 'insensitive',
+            },
           },
         });
         if (categoria) {
           condiciones[campo] = categoria.id;
         }
       } else {
-        condiciones[campo] = {
-          equals: valor,
-          mode: 'insensitive', 
-        };
+        condiciones[campo] = valor;
       }
     }
   

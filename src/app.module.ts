@@ -11,6 +11,7 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { CartModule } from './cart/cart.module';
 import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
+import { VariantsModule } from './variants/variants.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { OrdersModule } from './orders/orders.module';
         from: `"Soporte" <${process.env.MAIL_USER}>`,
       },
     }),
-    PrismaModule, UsersModule, AuthModule, GeminiModule, FavoritesModule, StatisticsModule, CartModule, PaymentsModule, OrdersModule],
+    PrismaModule, UsersModule, AuthModule, GeminiModule, FavoritesModule, StatisticsModule, CartModule, PaymentsModule, OrdersModule, VariantsModule],
   controllers: [AppController],
   providers: [AppService],
 })

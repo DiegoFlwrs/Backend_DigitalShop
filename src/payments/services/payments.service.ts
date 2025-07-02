@@ -66,62 +66,70 @@ export class PaymentsService {
   }
 
   async handleWebhook(
-  method: PaymentMethod,
-  data: any,
-): Promise<{ success: boolean }> {
-  const provider = this.getProvider(method);
-  const { success, orderId, status } = await provider.handleWebhook(data);
+    method: PaymentMethod,
+    data: any,
+  ): Promise<{ success: boolean }> {
+    const provider = this.getProvider(method);
+    const { success, orderId, status } = await provider.handleWebhook(data);
 
-  // Validación de seguridad
-  if (!orderId || !status) {
-    return { success: false };
-  }
+    if (!orderId || !status) {
+      return { success: false };
+    }
 
-  if (status === 'approved') {
-    // 👉 Procesar pago exitoso
-    await this.prisma.$transaction(async (prisma) => {
-      await prisma.payment.updateMany({
-        where: { orderId },
-        data: { status: 'completed' },
-      });
-
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { status: 'completed' },
-      });
-
-      const orderItems = await prisma.orderItem.findMany({
-        where: { orderId },
-      });
-
-      for (const item of orderItems) {
-        await prisma.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
+    if (status === 'approved') {
+      await this.prisma.$transaction(async (prisma) => {
+        await prisma.payment.updateMany({
+          where: { orderId },
+          data: { status: 'completed' },
         });
-      }
-    });
-  } else if (status === 'rejected') {
-    // 👉 Si fue rechazado, actualiza el estado pero no borres nada
-    await this.prisma.payment.updateMany({
-      where: { orderId },
-      data: { status: 'failed' },
-    });
 
-    await this.prisma.order.update({
-      where: { id: orderId },
-      data: { status: 'failed' }, // puedes usar 'failed' o 'pending'
-    });
+        await prisma.order.update({
+          where: { id: orderId },
+          data: { status: 'completed' },
+        });
 
-    console.log(`⚠️ Pago rechazado para orden ${orderId}`);
+        const orderItems = await prisma.orderItem.findMany({
+          where: { orderId },
+        });
+
+        for (const item of orderItems) {
+          await prisma.productVariant.update({
+            where: { id: item.productVariantId },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+        }
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+        });
+
+        const cart = await prisma.cart.findUnique({
+          where: { userId: order?.userId },
+        });
+
+        if (cart) {
+          await prisma.cartItem.deleteMany({
+            where: { cartId: cart.id },
+          });
+        }
+      });
+    } else if (status === 'rejected') {
+      await this.prisma.payment.updateMany({
+        where: { orderId },
+        data: { status: 'failed' },
+      });
+
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { status: 'failed' },
+      });
+    }
+
+    return { success: true };
   }
-
-  return { success: true };
-}
 
   async getPaymentStatus(userId: number, paymentId: number) {
     const payment = await this.prisma.payment.findUnique({
