@@ -16,3 +16,8 @@ export interface CodeData {
     code: string;
     newPassword: string;
   }
+
+   export class ResetPasswordNoCodeDto {
+    email: string;
+    newPassword: string;
+  }

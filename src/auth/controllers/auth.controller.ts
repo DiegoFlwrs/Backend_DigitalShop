@@ -1,7 +1,7 @@
 // src/auth/auth.controller.ts
 import { Controller, Post, Body, Get, Req, Res } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { ResetPasswordDto, SendCodeDto, VerifyCodeDto } from '../data/data';
+import { ResetPasswordDto, ResetPasswordNoCodeDto, SendCodeDto, VerifyCodeDto } from '../data/data';
 import { Response } from 'express';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -64,4 +64,10 @@ async loginWithGoogleToken(@Body() body: { token: string }) {
 
   return this.authService.generateJWT(user);
 }
+@UseGuards(AuthGuard('jwt'))
+@Post('reset-password-nocode')
+  async resetPasswordNoCode(@Body() dto: ResetPasswordNoCodeDto) {
+    return this.authService.resetPasswordNoCode(dto.email, dto.newPassword);
+  }
+
 }

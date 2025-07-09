@@ -98,6 +98,29 @@ export class AuthService {
     }
   }
 
+
+  async resetPasswordNoCode(email: string, newPassword: string) {
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    try {
+      await this.prisma.user.update({
+        where: { email },
+        data: { password: hashed },
+      });
+
+      this.codes.delete(email);
+
+      return { success: true, message: 'Contraseña actualizada correctamente' };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          'No se pudo actualizar la contraseña. Verifica que el correo exista.',
+      };
+    }
+  }
+
   // async validateOrCreateSocialUser(profile: {
   //   email: string;
   //   firstName: string;
