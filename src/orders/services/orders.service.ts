@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrderResponseDto } from '../dtos/order-response.dto';
 import { CreateOrderDto } from '../dtos/create-order.dto';
-
+import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 @Injectable()
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
@@ -151,4 +152,42 @@ private mapOrderToResponse(order: any): OrderResponseDto {
       data: { status },
     });
   }
+
+  async getOrderSummaryByUser(userId: number) {
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExists) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const orders = await this.prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return orders.map((order) => ({
+      id: order.id,
+      title: `Pedido #${order.id.toString().padStart(3, '0')}`,
+      status: this.translateStatus(order.status),
+      date: format(order.createdAt, 'dd MMM yyyy', { locale: es }),
+    }));
+  }
+
+  private translateStatus(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'Entregado';
+      case 'shipped':
+        return 'En camino';
+      case 'processing':
+        return 'Preparando';
+      case 'cancelled':
+        return 'Cancelado';
+      default:
+        return 'Pendiente';
+    }
+  }
+
 }

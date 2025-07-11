@@ -8,6 +8,7 @@ import {
   Param,
   Headers,
   HttpCode,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { PaymentsService } from '../services/payments.service';
@@ -47,6 +48,12 @@ export class PaymentsController {
   async getStatus(@Req() req: Request, @Param('id') id: string) {
     const userId = (req.user as any)?.userId;
     return this.paymentsService.getPaymentStatus(userId, parseInt(id));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('history/:userId')
+  async getPaymentHistory(@Param('userId', ParseIntPipe) userId: number) {
+    return this.paymentsService.getPaymentHistoryByUser(userId);
   }
   
 }
