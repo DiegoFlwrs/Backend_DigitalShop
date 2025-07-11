@@ -35,6 +35,40 @@ export class StatisticsService {
     return result; // Ejemplo: { "Ropa": 15, "Zapatos": 8 }
   }
 
+  async getFavoritesByCategoryUser(userId: number) {
+  const data = await this.prisma.favorite.groupBy({
+    by: ['productId'],
+    where: { 
+      userId: Number(userId)
+     },  // <--- filtro aquí por usuario
+    _count: { productId: true },
+  });
+
+  const productIds = data.map((d) => d.productId);
+  const products = await this.prisma.product.findMany({
+    where: { id: { in: productIds } },
+    select: {
+      id: true,
+      name: true,
+      category: { select: { id: true, name: true } },
+    },
+  });
+
+  const result: Record<string, number> = {};
+  for (const product of products) {
+    const categoryName = product.category.name;
+    const count = data.find((d) => d.productId === product.id)?._count.productId ?? 0;
+    if (result[categoryName]) {
+      result[categoryName] += count;
+    } else {
+      result[categoryName] = count;
+    }
+  }
+
+  return result; // Ej: { "Ropa": 5, "Zapatos": 2 } solo para este usuario
+}
+
+
   async getFavoritesByColor() {
   const data = await this.prisma.favorite.groupBy({
     by: ['productId'],
@@ -90,4 +124,37 @@ export class StatisticsService {
 
     return result; // Ejemplo: { "Ropa": 30, "Zapatos": 15 }
   }
+
+  async getUserSpendData(userId: number) {
+    const orders = await this.prisma.order.findMany({
+      where: { userId },
+      select: { total: true, createdAt: true },
+    });
+
+    const payments = await this.prisma.payment.findMany({
+      where: { userId },
+      select: { amount: true, createdAt: true },
+    });
+
+    return {
+      orderCount: orders.length,
+      totalSpent: payments.reduce((sum, p) => sum + p.amount, 0),
+      averageSpend:
+        orders.length > 0
+          ? payments.reduce((sum, p) => sum + p.amount, 0) / orders.length
+          : 0,
+    };
+  }
+
+  async getUserPredictionData(userId: number) {
+  const favoritesByCategory = await this.getFavoritesByCategoryUser(userId);  // ahora por usuario
+  const spendData = await this.getUserSpendData(userId);
+
+  return {
+    favorites: favoritesByCategory,
+    orderCount: spendData.orderCount,
+    totalSpent: spendData.totalSpent,
+    averageSpend: spendData.averageSpend,
+  };
+}
 }

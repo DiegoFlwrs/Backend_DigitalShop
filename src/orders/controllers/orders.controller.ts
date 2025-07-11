@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { OrdersService } from '../services/orders.service';
@@ -49,5 +50,11 @@ export class OrdersController {
     const userId = (req.user as any)?.userId
     return this.ordersService.getUserOrders(userId);
   }
+
+  @Get('history/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  async getOrderSummary(@Param('userId', ParseIntPipe) userId: number) {
+  return this.ordersService.getOrderSummaryByUser(userId);
+}
   
 }

@@ -9,6 +9,8 @@ import { OrdersService } from 'src/orders/services/orders.service';
 import { PaymentMethod } from '../dto/create-payment.dto';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { PaymentResponseDto } from '../dto/payment-response.dto';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 @Injectable()
 export class PaymentsService {
@@ -149,5 +151,46 @@ export class PaymentsService {
       orderId: payment.orderId,
       createdAt: payment.createdAt,
     };
+  }
+
+  async getPaymentHistoryByUser(userId: number) {
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExists) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const payments = await this.prisma.payment.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return payments.map((payment) => ({
+      id:payment.id,
+      title: `Pago #${payment.id.toString().padStart(3, '0')}`,
+      amount: this.formatCurrency(payment.amount, payment.currency),
+      date: format(payment.createdAt, 'dd MMM yyyy', { locale: es }),
+      status: this.translateStatus(payment.status),
+    }));
+  }
+
+  private formatCurrency(amount: number, currency: string): string {
+    const symbol = currency === 'PEN' ? 'S/' : '$';
+    return `${symbol} ${amount.toFixed(2)}`;
+  }
+
+  private translateStatus(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'Completado';
+      case 'failed':
+        return 'Cancelado';
+      case 'cancelled':
+        return 'Cancelado';
+      default:
+        return 'Pendiente';
+    }
   }
 }
