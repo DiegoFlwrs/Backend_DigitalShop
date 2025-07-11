@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { PaymentProvider } from '../interfaces/payment-provider.interface';
 import { PaymentResponseDto } from '../dto/payment-response.dto';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class MercadoPagoProvider implements PaymentProvider {
   private preference: Preference;
   private payment: Payment;
 
-  constructor() {
+  constructor(
+    private readonly mailerService: MailerService,
+  ) {
     const mp = new MercadoPagoConfig({
       accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN!,
     });
@@ -64,8 +67,17 @@ export class MercadoPagoProvider implements PaymentProvider {
 
       const orderId = parseInt(payment.external_reference ?? '0');
       const status = payment.status;
+      const email = payment.payer?.email
 
       console.log(`📦 Webhook recibido - Pago ${paymentId} para orden ${orderId} con estado ${status}`);
+
+      if (status === 'approved' && email) {
+          await this.mailerService.sendMail({
+            to: email,
+            subject: 'Pago confirmado',
+            text: `Tu pago para la orden #${orderId} ha sido aprobado. ¡Gracias por tu compra!`,
+          });
+        }
 
       return {
         success: status === 'approved',
